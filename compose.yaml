@@ -1,0 +1,22 @@
+services:
+  browser-lite:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file: .env
+    volumes:
+      - browser-data:/data
+    restart: unless-stopped
+    shm_size: 64mb
+    mem_limit: 512m
+    cpus: 1
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+volumes:
+  browser-data:

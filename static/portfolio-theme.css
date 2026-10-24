@@ -1,0 +1,67 @@
+/* Tokens adapted from abbn7/glass-morphic-brilliance, commit d1dab0a. */
+:root {
+  --radius: 1rem;
+  --background: oklch(0.08 0.01 260);
+  --foreground: oklch(0.97 0.005 250);
+  --card: oklch(1 0 0 / 6%);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.14 0.01 260);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.82 0.13 185);
+  --primary-foreground: oklch(0.12 0.02 220);
+  --secondary: oklch(1 0 0 / 8%);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(1 0 0 / 6%);
+  --muted-foreground: oklch(0.78 0.015 250);
+  --accent: oklch(1 0 0 / 10%);
+  --accent-foreground: var(--foreground);
+  --destructive: oklch(0.7 0.19 22);
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.82 0.13 185);
+  --destructive-foreground: oklch(0.98 0 0);
+  --glow-a: oklch(0.85 0.14 185);
+  --glow-b: oklch(0.72 0.2 350);
+  --glow-c: oklch(0.82 0.13 80);
+  --hero-copy-halo: oklch(0.08 0.01 260 / 78%);
+  --wa: oklch(0.78 0.18 150);
+  --glass-bg: linear-gradient(135deg, oklch(1 0 0 / 10%), oklch(1 0 0 / 3%));
+  --glass-border: oklch(1 0 0 / 16%);
+  --glass-shadow:
+    0 8px 32px -8px oklch(0 0 0 / 60%), inset 0 1px 0 oklch(1 0 0 / 22%),
+    inset 0 -1px 0 oklch(1 0 0 / 5%);
+  --glass-strong-bg: linear-gradient(135deg, oklch(1 0 0 / 18%), oklch(1 0 0 / 6%));
+  --glass-strong-border: oklch(1 0 0 / 28%);
+  --glass-strong-shadow:
+    0 20px 60px -15px oklch(0 0 0 / 74%), inset 0 1px 0 oklch(1 0 0 / 38%),
+    inset 0 -1px 0 oklch(1 0 0 / 8%);
+  --glass-chip-bg: oklch(1 0 0 / 8%);
+  --glass-chip-border: oklch(1 0 0 / 14%);
+  --glass-chip-hover: oklch(1 0 0 / 14%);
+  --glass-input-bg: oklch(1 0 0 / 5%);
+  --glass-input-focus: oklch(1 0 0 / 9%);
+  --glass-primary-border: oklch(1 0 0 / 30%);
+  --glass-highlight: oklch(1 0 0 / 40%);
+}
+@font-face{font-family:PortfolioArabic;src:url('/static/fonts/ibm-plex-arabic-400.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:PortfolioArabic;src:url('/static/fonts/ibm-plex-arabic-600.woff2') format('woff2');font-weight:600 800;font-display:swap}
+:root{--ink:var(--foreground);--muted:var(--muted-foreground);--line:var(--glass-chip-border);--blue:var(--glow-a)}
+html,body{background:var(--background);color:var(--foreground)}body{font-family:PortfolioArabic,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+.ambient{opacity:.26;filter:blur(75px);width:440px;height:440px}.one{background:var(--glow-a);top:-290px;left:-180px}.two{background:var(--glow-b);bottom:-300px;right:-280px}
+.glass{background:var(--glass-bg);border-color:var(--glass-border);box-shadow:var(--glass-shadow);backdrop-filter:blur(22px) saturate(175%);-webkit-backdrop-filter:blur(22px) saturate(175%)}
+.composer,.approval,.manual{background:var(--glass-strong-bg);border-color:var(--glass-strong-border);box-shadow:var(--glass-strong-shadow);backdrop-filter:blur(34px) saturate(185%);-webkit-backdrop-filter:blur(34px) saturate(185%)}
+.brand{letter-spacing:-.7px}.brand-lite{color:var(--muted-foreground)}.dot{background:var(--glass-strong-bg);border:1px solid var(--glass-strong-border);color:var(--glow-a);box-shadow:var(--glass-strong-shadow)}
+.browser{border-radius:28px}.browser-top{background:var(--glass-chip-bg);border-color:var(--glass-chip-border)}.traffic i:first-child{background:var(--glow-a)}
+.viewport{background:radial-gradient(ellipse at 30% 25%,oklch(.5 .12 185 / 16%),transparent 68%),radial-gradient(ellipse at 90% 85%,oklch(.45 .18 350 / 12%),transparent 65%),var(--background)}
+.orb{background:linear-gradient(135deg,color-mix(in oklab,var(--glow-a) 70%,transparent),color-mix(in oklab,var(--glow-b) 60%,transparent));border:1px solid var(--glass-primary-border);color:var(--foreground);box-shadow:0 10px 30px -10px var(--glow-a),inset 0 1px 0 var(--glass-highlight);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.pill,.secondary{background:var(--glass-chip-bg);border:1px solid var(--glass-chip-border);color:var(--foreground)}.pill{color:var(--glow-a)}
+.primary{background:linear-gradient(135deg,color-mix(in oklab,var(--glow-a) 70%,transparent),color-mix(in oklab,var(--glow-b) 60%,transparent));border:1px solid var(--glass-primary-border);color:var(--foreground);box-shadow:0 10px 30px -10px var(--glow-a),inset 0 1px 0 var(--glass-highlight);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.status-icon{background:var(--glass-chip-bg);border-color:var(--glass-chip-border);color:var(--glow-a)}.status-light{background:var(--glow-a);box-shadow:0 0 9px color-mix(in oklab,var(--glow-a) 35%,transparent)}
+.small-button,.file-link{color:var(--glow-a)}input:focus,textarea:focus{outline-color:var(--glow-a)}.autonomy input{accent-color:var(--glow-a)}input,textarea{background:var(--glass-input-bg);border-color:var(--glass-chip-border)}
+.url-field input,textarea{background:transparent}.empty-lines span:first-child{background:var(--glow-a)}.empty p,.task-status p,small,footer{color:var(--muted-foreground)}
+dialog{background:linear-gradient(135deg,#151719f5,#060809fa);border-color:var(--glass-strong-border);box-shadow:var(--glass-strong-shadow)}dialog::backdrop{background:#000c}.danger{color:oklch(.78 .12 22)}#toast{background:#161c1b;border-color:var(--glass-border)}
+button{transition:transform .3s cubic-bezier(.2,.8,.2,1),border-color .3s,background .3s}button:hover{border-color:var(--glass-primary-border)}button:focus-visible,a:focus-visible{outline-color:var(--glow-a)}
+@media(hover:hover){.primary:hover{transform:translateY(-2px)}}
+@media(max-width:767px){.glass,.composer,.approval,.manual{backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%)}}
+@media(prefers-reduced-transparency:reduce){.glass,.composer,.approval,.manual{background:#181b1b;backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
