@@ -103,7 +103,7 @@ async def logout(request:Request,response:Response,entry=Depends(owner)):
     response.delete_cookie('browser_lite_session');return {'ok':True}
 
 class TaskBody(BaseModel):
-    url:str=Field(max_length=2048)
+    url:str=Field(default='',max_length=2048)
     instruction:str=Field(min_length=1,max_length=12000)
     allow_actions:bool=False
 class URLBody(BaseModel):url:str=Field(max_length=2048)
@@ -119,7 +119,7 @@ class InputBody(BaseModel):
 def health():return {'ok':True}
 @app.get('/api/state',dependencies=[Depends(owner)])
 def state():
-    return {'task':engine.task,'browser_ready':engine.browser is not None,'busy':bool(engine.job and not engine.job.done()),'files':files()}
+    return {'task':engine.task,'browser_ready':engine.browser is not None,'busy':bool(engine.job and not engine.job.done()),'files':files(),'viewport':engine.viewport,'proxy':engine.proxy_info()}
 @app.get('/api/history',dependencies=[Depends(owner)])
 def history():return store.history()
 @app.post('/api/tasks',dependencies=[Depends(owner)])
@@ -127,6 +127,44 @@ async def start(body:TaskBody):
     if not body.instruction.strip():raise HTTPException(422,'اكتب المهمة')
     try:return await engine.start(body.url,body.instruction,body.allow_actions)
     except ValueError as e:raise HTTPException(409 if engine.job and not engine.job.done() else 422,str(e))
+class MessageBody(BaseModel):
+    text:str=Field(min_length=1,max_length=12000)
+    edit_id:str|None=None
+class ProxyBody(BaseModel):
+    enabled:bool=False
+    url:str=Field(default='',max_length=2048)
+    username:str=Field(default='',max_length=255)
+    password:str=Field(default='',max_length=512)
+    keep_password:bool=True
+@app.post('/api/messages',dependencies=[Depends(owner)])
+async def message(body:MessageBody):
+    try:return await engine.message(body.text,body.edit_id)
+    except ValueError as e:raise HTTPException(422,str(e))
+@app.get('/api/proxy',dependencies=[Depends(owner)])
+async def proxy_info():return engine.proxy_info()
+@app.put('/api/proxy',dependencies=[Depends(owner)])
+async def proxy_config(body:ProxyBody):
+    try:return await engine.configure_proxy(**body.model_dump())
+    except ValueError as e:raise HTTPException(409 if engine.job and not engine.job.done() else 422,str(e))
+@app.post('/api/proxy/test',dependencies=[Depends(owner)])
+async def proxy_test():
+    import ipaddress
+    async with engine.lock:
+        if engine.job and not engine.job.done():raise HTTPException(409,'أوقف المهمة قبل فحص البروكسي')
+        if not engine.proxy_config.get('enabled'):raise HTTPException(422,'فعّل بروكسي أولًا')
+        try:
+            await asyncio.wait_for(engine.navigate('https://api.ipify.org?format=json'),35)
+            session=await engine.browser.get_or_create_cdp_session()
+            result=await session.cdp_client.send.Runtime.evaluate(params={'expression':'document.body.innerText','returnByValue':True},session_id=session.session_id)
+            text=result.get('result',{}).get('value','')
+            ip=str(ipaddress.ip_address(json.loads(text)['ip']))
+            engine.proxy_check={'ok':True,'ip':ip,'time':time.time()}
+            engine.event('proxy','نجح فحص عنوان الخروج عبر البروكسي')
+            return engine.proxy_check
+        except Exception:
+            engine.proxy_check={'ok':False,'time':time.time()}
+            raise HTTPException(502,'فشل فحص البروكسي. الاتصال المباشر لن يُستخدم كبديل.')
+
 @app.post('/api/control/{action}',dependencies=[Depends(owner)])
 async def control(action:str):
     try:

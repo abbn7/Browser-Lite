@@ -1,16 +1,15 @@
-# تشغيل سريع
+# نشر نسخة Workspace v2
 
-1. ارفع ملفات الحزمة إلى GitHub الخاص بك.
-2. Railway → New Project → Deploy from GitHub → اختر المشروع.
-3. أضف Volume على `/data`.
-4. Variables: `APP_PASSWORD` (12 حرفًا أو أكثر)، `LLM_API_KEY` صالح، `LLM_PROVIDER`، `LLM_MODEL`، و`LLM_BASE_URL` إذا كان المزوّد OpenAI-compatible.
-5. Generate Domain، وافتح الرابط، ثم اختبر الموديل من الإعدادات.
-6. Safari → مشاركة → إضافة إلى الشاشة الرئيسية.
+1. ارفع ملفات الحزمة إلى GitHub خاص → Railway → Deploy from GitHub.
+2. أضف Volume على `/data`، وReplica واحدة.
+3. أضف `APP_PASSWORD` قويًا و`LLM_API_KEY` و`LLM_PROVIDER` و`LLM_MODEL` و`LLM_BASE_URL` المناسبين.
+4. Agent Router: `LLM_PROVIDER=agent_router`، `LLM_MODEL=gpt-6.1-sol`، `LLM_BASE_URL=https://agentrouter.org/v1`، `AGENT_ROUTER_TRANSPORT=codex`. Docker يتضمن الـCLI الرسمي.
+5. Generate Domain → افتح HTTPS → سجّل الدخول → اختبر الموديل.
+6. البروكسي من الإعدادات: عنوانه + المصادقة → تفعيل → حفظ → اختبار IP.
+7. Safari → مشاركة → إضافة للشاشة الرئيسية.
 
-Agent Router: `LLM_PROVIDER=agent_router` و`LLM_BASE_URL=https://agentrouter.org/v1`. معرف الموديل من الصورة `gpt-6.1-sol`، وقد نجح اختباره عبر CLI الرسمي. اترك `AGENT_ROUTER_TRANSPORT=codex`؛ الحاوية تتضمنه تلقائيًا. رفض HTTP المباشر كان رفضًا للعميل، وليس دليلًا على فساد المفتاح.
+الرابط في شريط عنوان المتصفح، والمهمة والرسائل في الشريط السفلي. المتصفح Desktop، مع زوم. اضغط بطاقة الحالة لعرض الخطوات، و«تعديل» تحت رسالتك لتغيير طلبك. التعديل لا يلغي الأفعال التي تمت.
 
-OpenRouter: `LLM_PROVIDER=openrouter` و`LLM_BASE_URL=https://openrouter.ai/api/v1` ومعرف موديل متاح في حسابك.
+OpenRouter: `LLM_PROVIDER=openrouter` و`LLM_BASE_URL=https://openrouter.ai/api/v1`. Google: `LLM_PROVIDER=google` ومعرف Gemini مناسب؛ احذف `LLM_BASE_URL`.
 
-Google: `LLM_PROVIDER=google` ومعرف Gemini متاح في حسابك؛ احذف `LLM_BASE_URL`.
-
-نجحت مهمة تصفح بموديل Agent Router الحقيقي داخل Docker بحد 512MiB، وأعلى ذاكرة مرصودة 351.5MiB؛ Railway المجاني وتوافق المواقع الثقيلة ليسا مضمونين. انظر `VALIDATION.md` و`README.md`.
+القياسات المحلية لا تضمن استقرار كل المواقع على Railway Free. التفاصيل والاختبارات في README.md وVALIDATION_V2.md.

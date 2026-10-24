@@ -6,3 +6,6 @@
 - Agent Router Claude Code setup: https://agentrouter.org/docs/claude-code.html — Anthropic route (documented, not used in this release).
 - Agent Router Roo Code setup: https://agentrouter.org/docs/roocode.html — OpenAI-compatible /v1 route matching the user's screenshot.
 - Official Codex: https://github.com/openai/codex — binary 0.163.0 from npm's official @openai/codex architecture package, npm SHA-512 verified during Docker build. Code mode host, voice components, Node.js and ripgrep are not installed because browser-model calls do not use them. Apache-2.0 license included.
+
+## Workspace v2 redesign
+The current runtime stylesheet is `static/workspace.css`. It retains the portfolio's layered-glass construction and local Arabic font, with a new user-requested AMOLED/ivory/champagne palette. The earlier teal/pink theme is no longer loaded. Chat, activity, proxy settings and desktop-browser framing are application-specific layouts.

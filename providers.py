@@ -13,8 +13,8 @@ class GatewayError(RuntimeError):
 class CodexModel:
     provider='agent-router-codex'
     _verified_api_keys=True
-    def __init__(self,model,api_key,base_url):
-        self.model=model;self.api_key=api_key;self.base_url=base_url
+    def __init__(self,model,api_key,base_url,on_status=None):
+        self.model=model;self.api_key=api_key;self.base_url=base_url;self.on_status=on_status
     @property
     def name(self):return self.model
     @property
@@ -60,6 +60,7 @@ class CodexModel:
                 env.pop(key,None)
             process=None
             try:
+                if self.on_status:self.on_status('انتظار رد الموديل لتحديد الفعل التالي')
                 process=await asyncio.create_subprocess_exec(*args,stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,env=env,start_new_session=True)
                 stdout,stderr=await asyncio.wait_for(process.communicate(prompt.encode()),timeout=int(os.getenv('MODEL_TIMEOUT_SECONDS','120')))
                 if process.returncode or not output.exists():
@@ -67,6 +68,7 @@ class CodexModel:
                     raise GatewayError('Codex gateway call failed; check model access and provider configuration')
                 text=output.read_text().strip()
                 if not text:raise GatewayError('Gateway returned an empty response')
+                if self.on_status:self.on_status('وصل رد الموديل؛ تجهيز خطوة المتصفح')
                 completion=output_format.model_validate_json(text) if output_format else text
                 return ChatInvokeCompletion(completion=completion,usage=None)
             except FileNotFoundError:
