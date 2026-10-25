@@ -69,7 +69,7 @@ async def headers(request,call_next):
     response.headers['Referrer-Policy']='no-referrer'
     response.headers['X-Frame-Options']='DENY'
     response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
-    response.headers['Cache-Control']='no-store' if request.url.path.startswith('/api') else 'no-cache'
+    response.headers['Cache-Control']='no-store'
     return response
 
 class Login(BaseModel):password:str=Field(max_length=512)
