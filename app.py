@@ -69,7 +69,7 @@ async def headers(request,call_next):
     response.headers['Referrer-Policy']='no-referrer'
     response.headers['X-Frame-Options']='DENY'
     response.headers['Content-Security-Policy']="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
-    response.headers['Cache-Control']='no-store'
+    response.headers['Cache-Control']='no-store' if request.url.path.startswith('/api') else 'no-cache'
     return response
 
 class Login(BaseModel):password:str=Field(max_length=512)
@@ -175,6 +175,12 @@ async def control(action:str):
         else:raise HTTPException(404)
         return {'ok':True}
     except ValueError as e:raise HTTPException(409,str(e))
+class BrowserLayout(BaseModel):
+    height:int=Field(ge=800,le=2200)
+@app.post('/api/browser/layout',dependencies=[Depends(owner)])
+async def browser_layout(body:BrowserLayout):
+    try:return await engine.layout(body.height)
+    except ValueError as e:raise HTTPException(409,str(e))
 @app.post('/api/browser/open',dependencies=[Depends(owner)])
 async def open_page(body:URLBody):
     async with engine.lock:
@@ -212,7 +218,7 @@ async def live(ws:WebSocket):
                 try:
                     data=await asyncio.wait_for(engine.snapshot(),8)
                     url=await engine.browser.get_current_page_url()
-                    await asyncio.wait_for(ws.send_json({'url':url}),5)
+                    await asyncio.wait_for(ws.send_json({'url':url,'viewport':engine.viewport}),5)
                     if engine.task and url.startswith(('https://','http://')) and engine.task.get('last_url')!=url:
                         engine.update(last_url=url)
                     await asyncio.wait_for(ws.send_bytes(data),5)
@@ -220,7 +226,7 @@ async def live(ws:WebSocket):
                 except Exception:
                     await ws.send_json({'status':'waiting'})
             else:await ws.send_json({'status':'closed'})
-            await asyncio.sleep(0.7)
+            await asyncio.sleep(1)
     except (WebSocketDisconnect,RuntimeError):pass
     finally:
         try:await ws.close()

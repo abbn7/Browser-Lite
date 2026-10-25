@@ -1,15 +1,23 @@
-# نشر نسخة Workspace v2
+# نشر dot — Minimal v3
 
-1. ارفع ملفات الحزمة إلى GitHub خاص → Railway → Deploy from GitHub.
-2. أضف Volume على `/data`، وReplica واحدة.
-3. أضف `APP_PASSWORD` قويًا و`LLM_API_KEY` و`LLM_PROVIDER` و`LLM_MODEL` و`LLM_BASE_URL` المناسبين.
-4. Agent Router: `LLM_PROVIDER=agent_router`، `LLM_MODEL=gpt-6.1-sol`، `LLM_BASE_URL=https://agentrouter.org/v1`، `AGENT_ROUTER_TRANSPORT=codex`. Docker يتضمن الـCLI الرسمي.
-5. Generate Domain → افتح HTTPS → سجّل الدخول → اختبر الموديل.
-6. البروكسي من الإعدادات: عنوانه + المصادقة → تفعيل → حفظ → اختبار IP.
-7. Safari → مشاركة → إضافة للشاشة الرئيسية.
+1. ارفع الملفات إلى GitHub خاص، واختره من Railway → Deploy from GitHub.
+2. أضف Volume على `/data` وReplica واحدة.
+3. Variables: `APP_PASSWORD` قوي، `LLM_API_KEY`، `LLM_PROVIDER`، `LLM_MODEL` و`LLM_BASE_URL` المناسبين.
+4. Agent Router: `LLM_PROVIDER=agent_router` و`LLM_MODEL=gpt-6.1-sol` و`LLM_BASE_URL=https://agentrouter.org/v1` و`AGENT_ROUTER_TRANSPORT=codex`. الـCLI موجود في Docker.
+5. Generate Domain، ثم HTTPS وتسجيل الدخول. Safari → مشاركة → إضافة إلى الشاشة الرئيسية.
 
-الرابط في شريط عنوان المتصفح، والمهمة والرسائل في الشريط السفلي. المتصفح Desktop، مع زوم. اضغط بطاقة الحالة لعرض الخطوات، و«تعديل» تحت رسالتك لتغيير طلبك. التعديل لا يلغي الأفعال التي تمت.
+## الواجهة
 
-OpenRouter: `LLM_PROVIDER=openrouter` و`LLM_BASE_URL=https://openrouter.ai/api/v1`. Google: `LLM_PROVIDER=google` ومعرف Gemini مناسب؛ احذف `LLM_BASE_URL`.
+- شريط الرابط فوق؛ يظهر النطاق فقط ويفتح الرابط كاملًا عند التركيز عليه.
+- الشات عايم على المتصفح؛ الرسالة من أسفل. لا عناوين أو كروت دائمة.
+- وقت العمل يظهر آخر حدث فعلي وعداد انتظار يتحدّث كل ثانية. اضغطه لفتح السجل.
+- زر الإرسال يصبح إيقافًا مؤقتًا أثناء العمل إذا كان حقل الرسالة فارغًا. الكتابة فيه ترجع زر الإرسال لتوجيه المهمة.
+- + يفتح الأدوات: موقع، مهمة جديدة، تحكم يدوي، كيبورد، سجل، زوم، عرض المتصفح فقط، واستكمال.
+- أيقونة القلم تحت رسالتك تعدّل الطلب. الأفعال التي تمت لا تُلغى تلقائيًا.
+- الإعدادات فيها الموديل والبروكسي وخيار النقر والكتابة التلقائي.
 
-القياسات المحلية لا تضمن استقرار كل المواقع على Railway Free. التفاصيل والاختبارات في README.md وVALIDATION_V2.md.
+## البروكسي
+
+الإعدادات → عنوان HTTP/HTTPS/SOCKS5/SOCKS4a + المصادقة → تفعيل → حفظ → اختبار IP. البروكسي للمتصفح، واتصال الموديل منفصل. لا يوجد رجوع مباشر عند فشل البروكسي.
+
+المتصفح بعرض Desktop 1280، وطول متكيف من 800 إلى 2200 للاستفادة من شاشة الموبايل، مع حد 1600 للسيرفرات الصغيرة مثل 512MiB. تغيير المقاس ينتظر توقف المهمة. تفاصيل التشغيل والقيود في README.md وVALIDATION_V3.md. لا يُضمن كل موقع أو استمرار مجاني غير محدود على Railway.

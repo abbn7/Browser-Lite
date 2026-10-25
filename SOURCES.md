@@ -7,5 +7,8 @@
 - Agent Router Roo Code setup: https://agentrouter.org/docs/roocode.html — OpenAI-compatible /v1 route matching the user's screenshot.
 - Official Codex: https://github.com/openai/codex — binary 0.163.0 from npm's official @openai/codex architecture package, npm SHA-512 verified during Docker build. Code mode host, voice components, Node.js and ripgrep are not installed because browser-model calls do not use them. Apache-2.0 license included.
 
-## Workspace v2 redesign
-The current runtime stylesheet is `static/workspace.css`. It retains the portfolio's layered-glass construction and local Arabic font, with a new user-requested AMOLED/ivory/champagne palette. The earlier teal/pink theme is no longer loaded. Chat, activity, proxy settings and desktop-browser framing are application-specific layouts.
+## Minimal v3 redesign
+
+The user's latest screenshots are the visual source for this revision: black AMOLED canvas (`#000000`), warm ivory (`#e8e2d4`), charcoal (`#302c27`) and restrained terracotta (`#ce785e`). The runtime stylesheet is `static/workspace.css`. It adapts the portfolio's glass borders, inner highlights and local Arabic type to a much thinner interface. The previous teal/pink and champagne card layouts are no longer loaded.
+
+The full-width desktop browser, floating chat, compact domain field, icon-only tools and small live activity line are specific to this application. No text, illustration, identity or chart was copied from the reference images. Icons are inline SVG paths; animations use CSS and the Web Animations API, without an animation library or decorative continuous rendering loop.
