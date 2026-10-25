@@ -35,8 +35,14 @@ class Store:
             key=path.read_bytes()
         return Fernet(key)
     def save_secret(self,name,data):
-        import os
-        path=self.root/(name+'.enc')
-        payload=self._cipher().encrypt(json.dumps(data).encode())
-        fd=os.open(path,os.O_CREAT|os.O_TRUNC|os.O_WRONLY,0o600)
-        with os.fdopen(fd,'wb') as f:f.write(payload)
+        import os,tempfile
+        with self.lock:
+            path=self.root/(name+'.enc')
+            payload=self._cipher().encrypt(json.dumps(data).encode())
+            fd,temporary=tempfile.mkstemp(prefix='.secret-',dir=self.root)
+            try:
+                with os.fdopen(fd,'wb') as f:
+                    f.write(payload);f.flush();os.fsync(f.fileno())
+                os.replace(temporary,path)
+            finally:
+                if os.path.exists(temporary):os.unlink(temporary)

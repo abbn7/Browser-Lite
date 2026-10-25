@@ -43,6 +43,14 @@ async def lifespan(app):
 
 app=FastAPI(lifespan=lifespan,docs_url=None,redoc_url=None,openapi_url=None)
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+@app.exception_handler(RequestValidationError)
+async def invalid_input(request,exc):
+    # Validation errors must not echo an API key or password from the request.
+    return JSONResponse(status_code=422,content={'detail':'راجع الحقول المطلوبة وطول القيم'})
+
+
 def same_origin(request):
     origin=request.headers.get('origin')
     if not origin:return False
@@ -96,7 +104,8 @@ async def login(body:Login,request:Request,response:Response):
 
 @app.get('/api/session')
 async def session(entry=Depends(owner)):
-    return {'csrf':entry['csrf'],'provider':os.getenv('LLM_PROVIDER','agent_router'),'model':os.getenv('LLM_MODEL','gpt-6.1-sol'),'configured':bool(os.getenv('LLM_API_KEY'))}
+    config=engine.models.active()
+    return {'csrf':entry['csrf'],'provider':config['provider'],'model':config['model'],'configured':bool(config['api_key'])}
 @app.post('/api/logout')
 async def logout(request:Request,response:Response,entry=Depends(owner)):
     sessions.pop(hashlib.sha256(request.cookies.get('browser_lite_session','').encode()).hexdigest(),None)
@@ -257,17 +266,68 @@ def download(name:str):
     if path.parent!=directory or not path.is_file() or path.stat().st_size>10*1024**2:raise HTTPException(404)
     return FileResponse(path,filename=path.name,media_type='application/octet-stream')
 
+from typing import Literal
+class ModelBody(BaseModel):
+    provider:Literal['agent_router','openrouter','google','nvidia','custom']
+    model:str=Field(min_length=1,max_length=200)
+    api_key:str=Field(default='',max_length=2048)
+    base_url:str=Field(default='',max_length=2048)
+    vision:bool=True
+
+async def model_profile(body):
+    from network import validate_url
+    try:
+        profile=engine.models.resolve(body.model_dump())
+        if profile['provider']!='google':await validate_url(profile['base_url'])
+        return profile
+    except (ValueError,OSError):raise HTTPException(422,'راجع الموديل والمفتاح وعنوان الخدمة العام HTTPS')
+
+@app.get('/api/model/settings',dependencies=[Depends(owner)])
+async def model_settings():return engine.models.public()
+
+@app.put('/api/model/settings',dependencies=[Depends(owner)])
+async def save_model(body:ModelBody):
+    async with engine.lock:
+        if engine.job and not engine.job.done():raise HTTPException(409,'أوقف المهمة قبل تغيير الموديل')
+        engine.models.save(await model_profile(body))
+        return engine.models.public()
+
+@app.delete('/api/model/settings/{provider}',dependencies=[Depends(owner)])
+async def delete_model(provider:Literal['agent_router','openrouter','google','nvidia','custom']):
+    async with engine.lock:
+        if engine.job and not engine.job.done():raise HTTPException(409,'أوقف المهمة قبل تغيير الموديل')
+        engine.models.delete(provider)
+        return engine.models.public()
+
+_model_catalog=None
+@app.get('/api/model/catalog',dependencies=[Depends(owner)])
+async def model_catalog():
+    global _model_catalog
+    if _model_catalog and time.monotonic()-_model_catalog[0]<300:return _model_catalog[1]
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            response=await client.get('https://openrouter.ai/api/v1/models');response.raise_for_status()
+        models=[{'id':m['id'],'vision':'image' in m.get('architecture',{}).get('input_modalities',[])} for m in response.json()['data'] if float(m.get('pricing',{}).get('prompt',-1))==0 and float(m.get('pricing',{}).get('completion',-1))==0]
+        result={'models':models};_model_catalog=(time.monotonic(),result);return result
+    except Exception:raise HTTPException(502,'تعذر تحديث القائمة؛ اكتب اسم الموديل يدويًا')
+
 @app.post('/api/model/test',dependencies=[Depends(owner)])
-async def model_test():
-    from browser_use.llm.messages import UserMessage
+async def model_test(body:ModelBody|None=None):
+    from browser_use.llm.messages import UserMessage,ContentPartTextParam,ContentPartImageParam,ImageURL
     from pydantic import BaseModel
     class Probe(BaseModel):ok:bool
+    if engine.job and not engine.job.done():raise HTTPException(409,'أوقف المهمة قبل الاختبار')
+    config=await model_profile(body) if body else engine.models.active()
+    content='Return ok=true. This is a structured-output connection test.'
+    if config['vision']:
+        content=[ContentPartTextParam(text=content),ContentPartImageParam(image_url=ImageURL(url='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAAK0lEQVR4nGN48egKTRHDqAWjFoxaMGrBqAWjFoxaMGrBqAWjFoxaMFQsAACUVXiXllshZgAAAABJRU5ErkJggg=='))]
     try:
-        result=await asyncio.wait_for(engine.llm().ainvoke([UserMessage(content='Return ok=true. This is a connection and structured-output test.')],output_format=Probe),30)
-        return {'ok':result.completion.ok}
+        result=await asyncio.wait_for(engine.llm(config).ainvoke([UserMessage(content=content)],output_format=Probe),int(os.getenv('MODEL_TIMEOUT_SECONDS','120'))+5)
+        if not result.completion.ok:raise ValueError()
+        return {'ok':True,'vision_tested':config['vision']}
     except Exception as e:
-        code=getattr(e,'status_code',None)
-        raise HTTPException(502,f'فشل اختبار الموديل: {type(e).__name__}'+(f' ({code})' if code else ''))
+        raise HTTPException(502,'لم ينجح اختبار الرد المنظّم'+(' والصور' if config['vision'] else '')+'؛ راجع المفتاح والموديل وحدود المزوّد') from None
 
 @app.get('/sw.js')
 def worker():return FileResponse(ROOT/'static/sw.js',media_type='application/javascript')

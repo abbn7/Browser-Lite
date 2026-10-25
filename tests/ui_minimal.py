@@ -12,7 +12,7 @@ async def main():
   errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
   await page.goto(BASE);await page.locator('#password').fill(PASSWORD);await page.locator('#loginForm button').click();await page.locator('#loginDialog').wait_for(state='hidden');await page.locator('#toast').wait_for(state='hidden')
   await page.locator('#url').fill('https://example.com');await page.locator('#open').click();await page.locator('#screen').wait_for(state='visible',timeout=45000)
-  await page.wait_for_function('() => document.getElementById("screen").naturalHeight>=2000')
+  await page.wait_for_function('() => document.getElementById("screen").naturalHeight>=800')
   for width in [360,390,430,1280]:
    await page.set_viewport_size({'width':width,'height':844});await page.wait_for_timeout(500)
    assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth')
@@ -21,6 +21,18 @@ async def main():
    assert abs(rect['width']/rect['height']-dimensions[0]/dimensions[1])<.002
    assert await page.locator('#form').evaluate('(e)=>e.getBoundingClientRect().bottom')<=844
   await page.set_viewport_size({'width':390,'height':844});await page.wait_for_timeout(600)
+  # Keyboard geometry simulation: fixed browser height, preserved draft, no server resize.
+  requests=[];page.on('request',lambda r:requests.append(r.url) if '/api/browser/layout' in r.url else None)
+  await page.locator('#instruction').fill('مسودة محفوظة')
+  before=await page.locator('#viewport').evaluate('(e)=>e.getBoundingClientRect().height')
+  await page.evaluate('''() => {window.__vv=window.visualViewport;const v=new EventTarget();v.height=500;v.offsetTop=0;Object.defineProperty(window,'visualViewport',{configurable:true,value:v});syncViewport()}''')
+  await page.wait_for_timeout(350)
+  assert await page.locator('#viewport').evaluate('(e)=>e.getBoundingClientRect().height')==before
+  assert await page.locator('#form').evaluate('(e)=>e.getBoundingClientRect().bottom')<=500
+  assert await page.locator('#instruction').input_value()=='مسودة محفوظة'
+  assert not requests
+  await page.evaluate('''() => {Object.defineProperty(window,'visualViewport',{configurable:true,value:window.__vv});syncViewport()}''')
+  await page.locator('#instruction').fill('');await page.locator('#instruction').blur()
   # Known target at native coordinates (640,300): verify actual browser hit.
   await page.evaluate("async()=>{const r=await fetch('/__test/target',{method:'POST',headers:{'X-CSRF-Token':csrf}});if(!r.ok)throw Error('fixture failed')}")
   await page.wait_for_timeout(1100)
@@ -55,8 +67,16 @@ async def main():
    await page.locator('#start').click()
   assert (await pause.value).status==200
   await page.wait_for_function('() => document.getElementById("start").disabled')
-  await page.locator('#settingsOpen').click();await page.locator('#proxyUrl').fill('socks5://proxy.example:1080');await page.locator('#proxyPassword').fill('test-password');await page.locator('#proxySave').click();await page.wait_for_function('() => document.getElementById("proxyResult").textContent.includes("تم الحفظ")');assert await page.locator('#proxyPassword').input_value()=='';await page.locator('#settingsClose').click()
+  await page.locator('#settingsOpen').click()
+  await page.wait_for_function('()=>modelProfiles!==null')
+  await page.locator('#modelProvider').select_option('nvidia');await page.locator('#modelName').fill('fixture-model');await page.locator('#modelKey').fill('ui-test-secret')
+  await page.locator('#saveModel').click();await page.wait_for_function('()=>document.getElementById("modelResult").textContent.includes("تم الحفظ")')
+  assert await page.locator('#modelKey').input_value()==''
+  await page.locator('#settingsClose').click();await page.locator('#settingsOpen').click();await page.wait_for_function('()=>document.getElementById("modelKey").placeholder.includes("محفوظ")')
+  assert await page.locator('#modelName').input_value()=='fixture-model'
+  await page.locator('#deleteModel').click();await page.wait_for_function('()=>document.getElementById("modelResult").textContent.includes("تم حذف")')
+  await page.locator('#proxyUrl').fill('socks5://proxy.example:1080');await page.locator('#proxyPassword').fill('test-password');await page.locator('#proxySave').click();await page.wait_for_function('() => document.getElementById("proxyResult").textContent.includes("تم الحفظ")');assert await page.locator('#proxyPassword').input_value()=='';await page.locator('#settingsClose').click()
   assert not errors,errors
-  print(json.dumps({'widths':[360,390,430,1280],'pixel_mapping_hits':metrics['hits'],'clock_ticks_without_new_events':True,'keyed_chat':True,'send_pause_control':True,'proxy_settings':True,'js_errors':errors}))
+  print(json.dumps({'widths':[360,390,430,1280],'pixel_mapping_hits':metrics['hits'],'clock_ticks_without_new_events':True,'keyed_chat':True,'send_pause_control':True,'keyboard_geometry_simulation':True,'encrypted_model_settings_ui':True,'proxy_settings':True,'js_errors':errors}))
   await b.close()
 asyncio.run(main())

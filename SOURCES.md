@@ -12,3 +12,9 @@
 The user's latest screenshots are the visual source for this revision: black AMOLED canvas (`#000000`), warm ivory (`#e8e2d4`), charcoal (`#302c27`) and restrained terracotta (`#ce785e`). The runtime stylesheet is `static/workspace.css`. It adapts the portfolio's glass borders, inner highlights and local Arabic type to a much thinner interface. The previous teal/pink and champagne card layouts are no longer loaded.
 
 The full-width desktop browser, floating chat, compact domain field, icon-only tools and small live activity line are specific to this application. No text, illustration, identity or chart was copied from the reference images. Icons are inline SVG paths; animations use CSS and the Web Animations API, without an animation library or decorative continuous rendering loop.
+
+## v4 interaction references (2026-10-25)
+
+Read repository READMEs: https://github.com/assistant-ui/assistant-ui (MIT; thread, composer, auto-scroll and streaming patterns), https://github.com/ibelick/prompt-kit (MIT; AI input/component composition). No React dependency or source component was added. https://github.com/emilkowalski/vaul currently declares itself unmaintained in its README and was excluded as a dependency. These are pattern references, not device testing or motion measurements.
+
+Provider reference routes: https://openrouter.ai/api/v1/models (free-price entries inspected during planning), https://docs.api.nvidia.com/nim/reference/llm-apis and https://opencode.ai/docs/zen/. No guarantee of permanent free access or universal model compatibility is made. NVIDIA and custom providers use the existing OpenAI-compatible transport; actual account/model compatibility requires the in-app probe.
